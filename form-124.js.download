@@ -66,40 +66,41 @@ window.addEventListener("load", function () {
       const emailInputs = form.querySelectorAll('input[type="email"]');
       emailInputs.forEach((input) => {
         input.addEventListener('input', () => {
-          const email = input.value;
-          const emailDomain = email.split('@')[1];
-
-          const warningMessage = document.createElement('p');
-          warningMessage.style.color = 'red';
-          warningMessage.style.marginTop = '1rem';
-          warningMessage.style.marginBottom = '1rem';
-          warningMessage.style.fontSize = '1rem';
-          warningMessage.style.display = 'none';
-          const existingWarningMessage = input.parentNode.querySelector('.warning-message');
-          if (blockedDomains.includes(emailDomain)) {
-            isBlocked = true;
-            submitButton.disabled = true;
-            submitButton.style.cursor = 'not-allowed';
-            submitButton.style.backgroundColor = 'grey';
-            warningMessage.className = 'warning-message';
-            warningMessage.textContent = 'This email domain is blocked. Please enter a different email.';
-            warningMessage.style.display = 'block';
-            if (existingWarningMessage) {
-              input.parentNode.removeChild(existingWarningMessage);
-            }
-
-            input.parentNode.appendChild(warningMessage);
-          } else {
-            isBlocked = false;
-            submitButton.disabled = false;
-            submitButton.style.cursor = '';
-            submitButton.style.backgroundColor = '';
-            if(existingWarningMessage) {
-              input.parentNode.removeChild(existingWarningMessage);
-            }
-          }
+          validateEmailInput(input, blockedDomains, submitButton);
         });
       });
+
+      function validateEmailInput(input, blockedDomains, submitButton) {
+        const email = input.value;
+        const emailDomain = email.split('@')[1];
+
+        const warningMessage = document.createElement('p');
+        warningMessage.style.color = 'red';
+        warningMessage.style.marginTop = '1rem';
+        warningMessage.style.marginBottom = '1rem';
+        warningMessage.style.fontSize = '1rem';
+        warningMessage.style.display = 'none';
+        const existingWarningMessage = input.parentNode.querySelector('.warning-message');
+        if (blockedDomains.includes(emailDomain)) {
+          submitButton.disabled = true;
+          submitButton.style.cursor = 'not-allowed';
+          submitButton.style.backgroundColor = 'grey';
+          warningMessage.className = 'warning-message';
+          warningMessage.textContent = 'This email domain is blocked. Please enter a different email.';
+          warningMessage.style.display = 'block';
+          if (existingWarningMessage) {
+            input.parentNode.removeChild(existingWarningMessage);
+          }
+          input.parentNode.appendChild(warningMessage);
+        } else {
+          submitButton.disabled = false;
+          submitButton.style.cursor = '';
+          submitButton.style.backgroundColor = '';
+          if (existingWarningMessage) {
+            input.parentNode.removeChild(existingWarningMessage);
+          }
+        }
+      }
     }
 
     const checkboxes = form.querySelectorAll('input[type="checkbox"][required]');
