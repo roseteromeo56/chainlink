@@ -61,7 +61,7 @@ window.addEventListener("load", function () {
       let additionalBlockedDomains = [];
       if(blockList.additionalBlockedDomains && Array.isArray(blockList.additionalBlockedDomains) && blockList.additionalBlockedDomains.length > 0) {
         additionalBlockedDomains = blockList.additionalBlockedDomains;
-        blockedDomains.push(...additionalBlockedDomains);
+        blockedDomains = Array.from(new Set([...blockedDomains, ...additionalBlockedDomains]));
       }
       const emailInputs = form.querySelectorAll('input[type="email"]');
       emailInputs.forEach((input) => {
