@@ -3,6 +3,8 @@ package environment
 import (
 	"context"
 	"crypto/ecdsa"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -57,6 +59,7 @@ import (
 	"github.com/smartcontractkit/chainlink-testing-framework/framework"
 	"github.com/smartcontractkit/chainlink-testing-framework/framework/components/blockchain"
 	"github.com/smartcontractkit/chainlink-testing-framework/framework/components/jd"
+	"github.com/smartcontractkit/chainlink-testing-framework/framework/components/s3provider"
 	ns "github.com/smartcontractkit/chainlink-testing-framework/framework/components/simple_node_set"
 	"github.com/smartcontractkit/chainlink-testing-framework/lib/utils/ptr"
 )
@@ -128,6 +131,7 @@ type Config struct {
 	JD                *jd.Input               `toml:"jd" validate:"required"`
 	Infra             *libtypes.InfraInput    `toml:"infra" validate:"required"`
 	ExtraCapabilities ExtraCapabilitiesConfig `toml:"extra_capabilities"`
+	S3ProviderInput   *s3provider.Input       `toml:"s3provider"`
 }
 
 func (c Config) Validate() error {
@@ -152,11 +156,12 @@ var (
 var StartCmdPreRunFunc = func(cmd *cobra.Command, args []string) {
 	provisioningStartTime = time.Now()
 
-	var dxErr error
-	dxTracker, dxErr = tracking.NewDxTracker()
-	if dxErr != nil {
-		fmt.Fprintf(os.Stderr, "failed to create DX tracker: %s\n", dxErr)
-		dxTracker = &tracking.NoOpTracker{}
+	// ensure non-nil dxTracker by default
+	dxTracker = new(tracking.DxTracker)
+	if t, err := tracking.NewDxTracker(); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create DX tracker: %s\n", err)
+	} else {
+		dxTracker = t
 	}
 
 	// remove all containers before starting the environment, just in case
@@ -222,10 +227,11 @@ var StartCmdGenerateSettingsFile = func(homeChainOut *creenv.BlockchainOutput, o
 	creCLISettingsFile, settingsErr := crecli.PrepareCRECLISettingsFile(
 		crecli.CRECLIProfile,
 		homeChainOut.SethClient.MustGetRootKeyAddress(),
-		output.CldEnvironment.ExistingAddresses, //nolint:staticcheck // won't migrate now
+		output.CldEnvironment.ExistingAddresses, //nolint:staticcheck // ignore SA1019 as ExistingAddresses is deprecated but still used
 		output.DonTopology.WorkflowDonID,
 		homeChainOut.ChainSelector,
 		rpcs,
+		output.S3ProviderOutput,
 	)
 
 	if settingsErr != nil {
@@ -307,7 +313,7 @@ var startCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "Error: %s\n", startErr)
 			fmt.Fprintf(os.Stderr, "Stack trace: %s\n", string(debug.Stack()))
 
-			dxErr := trackStartup(false, output.InfraInput.InfraType, ptr.Ptr(strings.SplitN(startErr.Error(), "\n", 1)[0]), ptr.Ptr(false))
+			dxErr := trackStartup(false, "unknown", ptr.Ptr(strings.SplitN(startErr.Error(), "\n", 1)[0]), ptr.Ptr(false))
 			if dxErr != nil {
 				fmt.Fprintf(os.Stderr, "failed to track startup: %s\n", dxErr)
 			}
@@ -628,6 +634,15 @@ func StartCLIEnvironment(
 		))
 	}
 
+	if in.JD.CSAEncryptionKey == "" {
+		// generate a new key
+		key, keyErr := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
+		if keyErr != nil {
+			return nil, fmt.Errorf("failed to generate CSA encryption key: %w", keyErr)
+		}
+		in.JD.CSAEncryptionKey = hex.EncodeToString(crypto.FromECDSA(key)[:32])
+		fmt.Printf("Generated new CSA encryption key for JD: %s\n", in.JD.CSAEncryptionKey)
+	}
 	universalSetupInput := creenv.SetupInput{
 		CapabilitiesAwareNodeSets:            capabilitiesAwareNodeSets,
 		CapabilitiesContractFactoryFunctions: capabilityFactoryFns,
@@ -638,6 +653,7 @@ func StartCLIEnvironment(
 		ConfigFactoryFunctions: []cretypes.ConfigFactoryFn{
 			gatewayconfig.GenerateConfig,
 		},
+		S3ProviderInput: in.S3ProviderInput,
 	}
 
 	if withPluginsDockerImageFlag == "" {
