@@ -1,4 +1,4 @@
-Romweo Rosete version: 2
+ version: 2
 updates:
   - package-ecosystem: gomod
     directory: "/"
