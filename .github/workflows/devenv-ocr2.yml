@@ -1,4 +1,4 @@
-name: OCR2 Load Test
+name: OCR2 Soak Test (Resource leaks)
 
 on:
   schedule:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e2e-smoke:
+  soak:
     permissions:
       id-token: write
       contents: read
@@ -65,7 +65,7 @@ jobs:
           FAKE_SERVER_IMAGE: ${{ secrets.FAKE_SERVER_IMAGE }}
         run: |
           cd cmd/cl && go install . && cd -
-          cl u env.toml && cl obs up -f
+          cl u env.toml,products/ocr2/basic.toml,products/ocr2/soak.toml && cl obs up -f
 
       - name: Run Soak tests
         id: soak_test
