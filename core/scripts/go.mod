@@ -25,6 +25,7 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/avast/retry-go/v4 v4.6.1
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
 	github.com/docker/docker v28.5.1+incompatible
@@ -55,7 +56,7 @@ require (
 	github.com/smartcontractkit/chainlink-protos/cre/go v0.0.0-20251124151448-0448aefdaab9
 	github.com/smartcontractkit/chainlink-protos/job-distributor v0.17.0
 	github.com/smartcontractkit/chainlink-testing-framework/framework v0.13.0
-	github.com/smartcontractkit/chainlink-testing-framework/framework/components/dockercompose v0.1.18
+	github.com/smartcontractkit/chainlink-testing-framework/framework/components/dockercompose v0.1.19
 	github.com/smartcontractkit/chainlink-testing-framework/lib v1.54.5
 	github.com/smartcontractkit/chainlink-testing-framework/seth v1.51.2
 	github.com/smartcontractkit/chainlink/core/scripts/cre/environment/examples/workflows/v1/proof-of-reserve/cron-based v0.0.0-20251020210257-0a6ec41648b4
@@ -123,7 +124,6 @@ require (
 	github.com/aptos-labs/aptos-go-sdk v1.11.0 // indirect
 	github.com/atombender/go-jsonschema v0.16.1-0.20240916205339-a74cd4e2851c // indirect
 	github.com/avast/retry-go v3.0.0+incompatible // indirect
-	github.com/avast/retry-go/v4 v4.6.1 // indirect
 	github.com/awalterschulze/gographviz v2.0.3+incompatible // indirect
 	github.com/aws/aws-sdk-go v1.55.7 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.1 // indirect

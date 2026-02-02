@@ -68,6 +68,8 @@ import (
 	httpaction_smoke_config "github.com/smartcontractkit/chainlink/system-tests/tests/smoke/cre/httpaction/config"
 )
 
+const WorkflowEngineInitErrorLog = "Workflow Engine initialization failed"
+
 /////////////////////////
 // ENVIRONMENT HELPERS //
 /////////////////////////
@@ -123,7 +125,7 @@ Recommendation: Use it in tests that need to listen for Beholder messages.
 func StartBeholder(t *testing.T, testLogger zerolog.Logger, testEnv *ttypes.TestEnvironment) (context.Context, <-chan proto.Message, <-chan error) {
 	t.Helper()
 
-	beholder, err := NewBeholder(framework.L, testEnv.TestConfig.RelativePathToRepoRoot, testEnv.TestConfig.EnvironmentDirPath)
+	beholder, err := NewBeholder(framework.L, testEnv.TestConfig)
 	require.NoError(t, err, "failed to create beholder instance")
 
 	// We are interested in UserLogs (successful execution)
@@ -178,7 +180,7 @@ func AssertBeholderMessage(ctx context.Context, t *testing.T, expectedLog string
 				// Process received messages
 				switch typedMsg := msg.(type) {
 				case *commonevents.BaseMessage:
-					if strings.Contains(typedMsg.Msg, "Workflow Engine initialization failed") {
+					if strings.Contains(typedMsg.Msg, WorkflowEngineInitErrorLog) {
 						foundErrorLog <- true
 					}
 				case *workflowevents.UserLogs:
