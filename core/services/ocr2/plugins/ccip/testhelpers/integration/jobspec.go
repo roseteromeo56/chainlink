@@ -20,6 +20,7 @@ import (
 	"github.com/smartcontractkit/chainlink/v2/core/services/ocr2/plugins/ccip/internal/pricegetter"
 	"github.com/smartcontractkit/chainlink/v2/core/services/relay"
 	"github.com/smartcontractkit/chainlink/v2/core/store/models"
+	"strings"
 )
 
 // OCR2TaskJobSpec represents an OCR2 job that is given to other nodes, meant to communicate with the bootstrap node,
@@ -239,9 +240,11 @@ func (params CCIPJobSpecParams) CommitJobSpec() (*OCR2TaskJobSpec, error) {
 """`, params.TokenPricesUSDPipeline)
 	}
 	if params.PriceGetterConfig != "" {
+		escapedPriceGetterConfig := strings.ReplaceAll(params.PriceGetterConfig, `\`, `\\`)
+		escapedPriceGetterConfig = strings.ReplaceAll(escapedPriceGetterConfig, `"`, `\"`)
 		pluginConfig["priceGetterConfig"] = fmt.Sprintf(`"""
 %s
-"""`, params.PriceGetterConfig)
+"""`, escapedPriceGetterConfig)
 	}
 
 	ocrSpec := job.OCR2OracleSpec{
