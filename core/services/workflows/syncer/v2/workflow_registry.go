@@ -17,13 +17,13 @@ import (
 	"github.com/jonboulle/clockwork"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/capabilities"
+	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	nodeauthjwt "github.com/smartcontractkit/chainlink-common/pkg/nodeauth/jwt"
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/types"
 	"github.com/smartcontractkit/chainlink-common/pkg/types/query/primitives"
 	"github.com/smartcontractkit/chainlink-evm/gethwrappers/workflow/generated/workflow_registry_wrapper_v2"
 	"github.com/smartcontractkit/chainlink-evm/pkg/config"
-	"github.com/smartcontractkit/chainlink/v2/core/logger"
 	"github.com/smartcontractkit/chainlink/v2/core/services/shardorchestrator"
 	"github.com/smartcontractkit/chainlink/v2/core/services/workflows/syncer/versioning"
 )
@@ -117,6 +117,8 @@ type Hooks struct {
 
 type evtHandler interface {
 	io.Closer
+	Start(context.Context) error
+
 	Handle(ctx context.Context, event Event) error
 }
 
@@ -359,7 +361,7 @@ func (w *workflowRegistry) Start(_ context.Context) error {
 			w.syncAllowlistedRequests(ctx)
 		}()
 
-		return nil
+		return w.handler.Start(ctx)
 	})
 }
 
@@ -367,7 +369,11 @@ func (w *workflowRegistry) Close() error {
 	return w.StopOnce(w.Name(), func() error {
 		close(w.stopCh)
 		w.wg.Wait()
-		return w.handler.Close()
+		svcs := []io.Closer{w.handler}
+		if w.shardOrchestratorClient != nil {
+			svcs = append(svcs, w.shardOrchestratorClient)
+		}
+		return services.CloseAll(svcs...)
 	})
 }
 

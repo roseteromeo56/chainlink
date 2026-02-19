@@ -108,6 +108,8 @@ ok Aptos.42.RelayerService.PluginRelayerClient
 ok Aptos.42.RelayerService.PluginRelayerClient.PluginAptos
 ok Aptos.42.RelayerService.PluginRelayerClient.PluginAptos.PluginRelayerConfigEmitter
 ok BridgeStatusReporter
+ok CRE
+ok CRE.DispatcherWrapper
 ok Cosmos.Foo.RelayerService
 ok Cosmos.Foo.RelayerService.PluginRelayerClient
 ok Cosmos.Foo.RelayerService.PluginRelayerClient.PluginCosmos
@@ -181,8 +183,6 @@ ok Tron.1001.RelayerService.PluginRelayerClient.PluginTron
 ok Tron.1001.RelayerService.PluginRelayerClient.PluginTron.PluginRelayerConfigEmitter
 ok Tron.1001.RelayerService.PluginRelayerClient.PluginTron.TronRelayer
 ok Tron.1001.RelayerService.PluginRelayerClient.PluginTron.TronTxm
-ok WorkflowEngineLimiters
-ok WorkflowExecutionLimiter
 ok WorkflowStore
 
 -- out-unhealthy.txt --
@@ -235,6 +235,24 @@ ok WorkflowStore
       "id": "BridgeStatusReporter",
       "attributes": {
         "name": "BridgeStatusReporter",
+        "status": "passing",
+        "output": ""
+      }
+    },
+    {
+      "type": "checks",
+      "id": "CRE",
+      "attributes": {
+        "name": "CRE",
+        "status": "passing",
+        "output": ""
+      }
+    },
+    {
+      "type": "checks",
+      "id": "CRE.DispatcherWrapper",
+      "attributes": {
+        "name": "CRE.DispatcherWrapper",
         "status": "passing",
         "output": ""
       }
@@ -874,24 +892,6 @@ ok WorkflowStore
       "id": "Tron.1001.RelayerService.PluginRelayerClient.PluginTron.TronTxm",
       "attributes": {
         "name": "Tron.1001.RelayerService.PluginRelayerClient.PluginTron.TronTxm",
-        "status": "passing",
-        "output": ""
-      }
-    },
-    {
-      "type": "checks",
-      "id": "WorkflowEngineLimiters",
-      "attributes": {
-        "name": "WorkflowEngineLimiters",
-        "status": "passing",
-        "output": ""
-      }
-    },
-    {
-      "type": "checks",
-      "id": "WorkflowExecutionLimiter",
-      "attributes": {
-        "name": "WorkflowExecutionLimiter",
         "status": "passing",
         "output": ""
       }
