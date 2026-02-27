@@ -96,7 +96,7 @@ func TriggerRegistrationID(workflowID string, triggerIndex int) string {
 // buildLabels creates the label slice for the beholder logger based on config and localNode state.
 // This is used both during engine creation and when updating labels after a DON configuration change.
 func (e *Engine) buildLabels(localNode *capabilities.Node) []any {
-	return []any{
+	labels := []any{
 		platform.KeyWorkflowID, e.cfg.WorkflowID,
 		platform.KeyWorkflowOwner, e.cfg.WorkflowOwner,
 		platform.KeyWorkflowName, e.cfg.WorkflowName.String(),
@@ -114,6 +114,10 @@ func (e *Engine) buildLabels(localNode *capabilities.Node) []any {
 		platform.EngineVersion, platform.ValueWorkflowVersionV2,
 		platform.DonVersion, strconv.FormatUint(uint64(pinnedWorkflowDonConfigVersion), 10),
 	}
+	if e.cfg.SdkName != "" {
+		labels = append(labels, platform.KeySDK, e.cfg.SdkName)
+	}
+	return labels
 }
 
 // logger returns the current logger in a thread-safe manner.
@@ -165,10 +169,15 @@ func NewEngine(cfg *EngineConfig) (*Engine, error) {
 	labels := engine.buildLabels(&localNode)
 
 	beholderLogger := logger.Sugared(custmsg.NewBeholderLogger(cfg.Lggr, cfg.BeholderEmitter).Named("WorkflowEngine").With(labels...))
-	metricsLabeler := monitoring.NewWorkflowsMetricLabeler(metrics.NewLabeler(), em).With(
+	baseLabels := []string{
 		platform.KeyWorkflowID, cfg.WorkflowID,
 		platform.KeyWorkflowOwner, cfg.WorkflowOwner,
-		platform.KeyWorkflowName, cfg.WorkflowName.String())
+		platform.KeyWorkflowName, cfg.WorkflowName.String(),
+	}
+	if cfg.SdkName != "" {
+		baseLabels = append(baseLabels, platform.KeySDK, cfg.SdkName)
+	}
+	metricsLabeler := monitoring.NewWorkflowsMetricLabeler(metrics.NewLabeler(), em).With(baseLabels...)
 	labelsMap := make(map[string]string, len(labels)/2)
 	for i := 0; i < len(labels); i += 2 {
 		labelsMap[labels[i].(string)] = labels[i+1].(string)
@@ -452,6 +461,7 @@ func (e *Engine) runTriggerSubscriptionPhase(ctx context.Context) error {
 				e.metrics.With(platform.KeyTriggerID, sub.Id).IncrementRegisterTriggerFailureCounter(gCtx)
 				return fmt.Errorf("failed to register trigger %s: %w", sub.Id, regErr)
 			}
+			e.metrics.IncrementSubscriptionsCounter(gCtx)
 			// Send successful result
 			resultsCh <- triggerRegResult{
 				index:          i,
@@ -677,6 +687,7 @@ func (e *Engine) startExecution(ctx context.Context, wrappedTriggerEvent enqueue
 		e.lggr.Errorf("failed to ACK trigger event (eventID=%s): %v", triggerEvent.ID, err)
 	}
 	e.metrics.With("workflowID", e.cfg.WorkflowID, "workflowName", e.cfg.WorkflowName.String()).IncrementWorkflowExecutionStartedCounter(ctx)
+	e.metrics.IncrementExecutionsCounter(ctx)
 
 	// Track execution error for deferred event emission
 	var execErr error
