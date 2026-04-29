@@ -36,7 +36,7 @@ require (
 	github.com/smartcontractkit/chainlink-common v0.11.2-0.20260428192532-b1f4aebef94a
 	github.com/smartcontractkit/chainlink-common/keystore v1.1.0
 	github.com/smartcontractkit/chainlink-deployments-framework v0.98.0
-	github.com/smartcontractkit/chainlink-evm v0.3.4-0.20260428180431-40447a80e681
+	github.com/smartcontractkit/chainlink-evm v0.3.4-0.20260429123911-44d13c62c6e1
 	github.com/smartcontractkit/chainlink-evm/gethwrappers v0.0.0-20260421142741-9c7fbaf7c828
 	github.com/smartcontractkit/chainlink-protos/cre/go v0.0.0-20260420204255-a3f3bdd56877
 	github.com/smartcontractkit/chainlink-protos/job-distributor v0.18.0
@@ -478,7 +478,7 @@ require (
 	github.com/smartcontractkit/chainlink-protos/ring/go v0.0.0-20260331131315-f08a616d8dcd // indirect
 	github.com/smartcontractkit/chainlink-protos/rmn/v1.6/go v0.0.0-20250131130834-15e0d4cde2a6 // indirect
 	github.com/smartcontractkit/chainlink-protos/storage-service v0.3.0 // indirect
-	github.com/smartcontractkit/chainlink-protos/svr v1.1.1-0.20260203131522-bb8bc5c423b3 // indirect
+	github.com/smartcontractkit/chainlink-protos/svr v1.2.0 // indirect
 	github.com/smartcontractkit/chainlink-solana/contracts v0.0.0-20260421131224-c46cbfe7bc6c // indirect
 	github.com/smartcontractkit/chainlink-sui v0.0.0-20260427132612-76b9f754a556 // indirect
 	github.com/smartcontractkit/chainlink-sui/deployment v0.0.0-20260427132612-76b9f754a556 // indirect
