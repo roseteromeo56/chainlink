@@ -61,7 +61,7 @@ require (
 	github.com/smartcontractkit/chainlink-ton/deployment v0.0.0-20260430134932-681b7a7fe426
 	github.com/smartcontractkit/cld-changesets v0.3.1-0.20260511171704-b04f4d990849
 	github.com/smartcontractkit/freeport v0.1.3-0.20250828155247-add56fa28aad
-	github.com/smartcontractkit/libocr v0.0.0-20260403184524-b6409238958d
+	github.com/smartcontractkit/libocr v0.0.0-20260508200755-99940c85383c
 	github.com/smartcontractkit/mcms v0.41.1
 	github.com/smartcontractkit/quarantine v0.0.0-20251203215908-fd0551c6adf9
 	github.com/smartcontractkit/smdkg v0.0.0-20251029093710-c38905e58aeb
