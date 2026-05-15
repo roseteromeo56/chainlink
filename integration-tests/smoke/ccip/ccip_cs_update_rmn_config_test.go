@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	mcmschangesets "github.com/smartcontractkit/cld-changesets/legacy/mcms/changesets"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 
@@ -370,7 +372,7 @@ func TestSetRMNRemoteOnRMNProxy(t *testing.T) {
 			Configs: prereqCfgs,
 		},
 	), commonchangeset.Configure(
-		cldf.CreateLegacyChangeSet(commonchangeset.DeployMCMSWithTimelockV2),
+		cldf.CreateLegacyChangeSet(mcmschangesets.DeployMCMSWithTimelockV2),
 		mcmsCfg,
 	))
 	require.NoError(t, err)

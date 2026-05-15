@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	chain_selectors "github.com/smartcontractkit/chain-selectors"
+	mcmschangesets "github.com/smartcontractkit/cld-changesets/legacy/mcms/changesets"
 	"github.com/stretchr/testify/require"
 
 	cldfproposalutils "github.com/smartcontractkit/chainlink-deployments-framework/engine/cld/mcms/proposalutils"
@@ -256,7 +257,7 @@ func TestDeployRegistryModuleChangeset(t *testing.T) {
 				},
 			),
 			commonchangeset.Configure(
-				cldf.CreateLegacyChangeSet(commonchangeset.DeployMCMSWithTimelockV2),
+				cldf.CreateLegacyChangeSet(mcmschangesets.DeployMCMSWithTimelockV2),
 				map[uint64]cldfproposalutils.MCMSWithTimelockConfig{
 					chain1: cldftesthelpers.SingleGroupTimelockConfig(t),
 				},
@@ -322,7 +323,7 @@ func TestDeployRegistryModuleChangeset(t *testing.T) {
 				},
 			),
 			commonchangeset.Configure(
-				cldf.CreateLegacyChangeSet(commonchangeset.DeployMCMSWithTimelockV2),
+				cldf.CreateLegacyChangeSet(mcmschangesets.DeployMCMSWithTimelockV2),
 				mcmsConfigs,
 			),
 		)
