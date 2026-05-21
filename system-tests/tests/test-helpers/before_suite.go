@@ -177,6 +177,8 @@ func cloneSharedEnvironmentForTest(sharedEnv *ttypes.TestEnvironment, tconf *tty
 	}
 }
 
+// configurePerTestExecutionContext creates one funded, registry-authorized signer, swaps testEnv EVM blockchains
+// to per-test seth clients, and sets the CLDF deployer key (SetupTestEnvironmentWithPerTestKeys).
 func configurePerTestExecutionContext(t *testing.T, sharedEnv *ttypes.TestEnvironment, testEnv *ttypes.TestEnvironment) *ttypes.ExecutionContext {
 	t.Helper()
 
