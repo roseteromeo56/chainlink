@@ -1434,6 +1434,8 @@ func Test_ChannelDefinitionCache_OwnerAndAdderMerging(t *testing.T) {
 		testutils.WaitForLogMessageWithField(t, observedLogs, "Got new logs",
 			"url", url)
 
+		testutils.WaitForLogMessageWithField(t, observedLogs, "Set channel definitions for source", "source", strconv.FormatUint(uint64(adder1ID), 10))
+
 		// Adder2 adds different channels
 		observedLogs.TakeAll()
 
@@ -1464,6 +1466,8 @@ func Test_ChannelDefinitionCache_OwnerAndAdderMerging(t *testing.T) {
 
 		testutils.WaitForLogMessageWithField(t, observedLogs, "Got new logs",
 			"url", url2)
+
+		testutils.WaitForLogMessageWithField(t, observedLogs, "Set channel definitions for source", "source", strconv.FormatUint(uint64(adder2ID), 10))
 
 		require.Eventually(t, func() bool {
 			defs := cdc.Definitions(llotypes.ChannelDefinitions{})
