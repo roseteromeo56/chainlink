@@ -14,10 +14,11 @@ import (
 
 	ocr2keepers "github.com/smartcontractkit/chainlink-common/pkg/types/automation"
 
+	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	"github.com/smartcontractkit/chainlink-common/pkg/services/servicetest"
-	"github.com/smartcontractkit/chainlink/v2/core/internal/testutils"
+	"github.com/smartcontractkit/chainlink-evm/pkg/testutils"
+
 	"github.com/smartcontractkit/chainlink/v2/core/internal/testutils/pgtest"
-	"github.com/smartcontractkit/chainlink/v2/core/logger"
 )
 
 func TestUpkeepStateStore(t *testing.T) {
@@ -164,8 +165,8 @@ func TestUpkeepStateStore(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := testutils.Context(t)
-			lggr := logger.TestLogger(t)
+			ctx := t.Context()
+			lggr := logger.Test(t)
 
 			scanner := &mockScanner{}
 			scanner.addWorkID(tc.workIDsFromScanner...)
@@ -308,7 +309,7 @@ func TestUpkeepStateStore_SetSelectIntegration(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := testutils.Context(t)
+			ctx := t.Context()
 
 			tickerCh := make(chan time.Time)
 
@@ -325,7 +326,7 @@ func TestUpkeepStateStore_SetSelectIntegration(t *testing.T) {
 				batchSize = oldFlushSize
 			}()
 
-			lggr, observedLogs := logger.TestLoggerObserved(t, zapcore.ErrorLevel)
+			lggr, observedLogs := logger.TestObserved(t, zapcore.ErrorLevel)
 			chainID := testutils.FixtureChainID
 			db := pgtest.NewSqlxDB(t)
 			realORM := NewORM(chainID, db)
@@ -387,7 +388,7 @@ func (u *upkeepStateStore) clearCache() {
 
 func TestUpkeepStateStore_emptyDB(t *testing.T) {
 	t.Run("querying non-stored workIDs on empty db returns unknown state results", func(t *testing.T) {
-		lggr, observedLogs := logger.TestLoggerObserved(t, zapcore.ErrorLevel)
+		lggr, observedLogs := logger.TestObserved(t, zapcore.ErrorLevel)
 		chainID := testutils.FixtureChainID
 		db := pgtest.NewSqlxDB(t)
 		realORM := NewORM(chainID, db)
@@ -404,7 +405,7 @@ func TestUpkeepStateStore_emptyDB(t *testing.T) {
 		scanner := &mockScanner{}
 		store := NewUpkeepStateStore(orm, lggr, scanner)
 
-		states, err := store.SelectByWorkIDs(testutils.Context(t), []string{"0x1", "0x2", "0x3", "0x4"}...)
+		states, err := store.SelectByWorkIDs(t.Context(), []string{"0x1", "0x2", "0x3", "0x4"}...)
 		assert.NoError(t, err)
 		assert.Equal(t, []ocr2keepers.UpkeepState{
 			ocr2keepers.UnknownState,
@@ -421,8 +422,8 @@ func TestUpkeepStateStore_emptyDB(t *testing.T) {
 
 func TestUpkeepStateStore_Upsert(t *testing.T) {
 	db := pgtest.NewSqlxDB(t)
-	ctx := testutils.Context(t)
-	lggr := logger.TestLogger(t)
+	ctx := t.Context()
+	lggr := logger.Test(t)
 	chainID := testutils.FixtureChainID
 	orm := NewORM(chainID, db)
 
@@ -450,7 +451,7 @@ func TestUpkeepStateStore_Upsert(t *testing.T) {
 }
 
 func TestUpkeepStateStore_Service(t *testing.T) {
-	ctx := testutils.Context(t)
+	ctx := t.Context()
 	orm := &mockORM{
 		onDelete: func(tm time.Time) {
 
@@ -458,7 +459,7 @@ func TestUpkeepStateStore_Service(t *testing.T) {
 	}
 	scanner := &mockScanner{}
 
-	store := NewUpkeepStateStore(orm, logger.TestLogger(t), scanner)
+	store := NewUpkeepStateStore(orm, logger.Test(t), scanner)
 
 	store.retention = 500 * time.Millisecond
 	store.cleanCadence = 100 * time.Millisecond

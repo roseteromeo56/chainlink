@@ -11,14 +11,13 @@ import (
 
 	ocr2keepers "github.com/smartcontractkit/chainlink-common/pkg/types/automation"
 
+	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	"github.com/smartcontractkit/chainlink-evm/pkg/heads"
 	"github.com/smartcontractkit/chainlink-evm/pkg/heads/headstest"
 	"github.com/smartcontractkit/chainlink-evm/pkg/logpoller"
 	evmtypes "github.com/smartcontractkit/chainlink-evm/pkg/types"
 
 	"github.com/smartcontractkit/chainlink/v2/common/logpoller/mocks"
-	"github.com/smartcontractkit/chainlink/v2/core/internal/testutils"
-	"github.com/smartcontractkit/chainlink/v2/core/logger"
 )
 
 const historySize = 4
@@ -26,7 +25,7 @@ const blockSize = int64(4)
 const finality = uint32(4)
 
 func TestBlockSubscriber_Subscribe(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	var hb heads.Broadcaster
 	var lp logpoller.LogPoller
 
@@ -45,7 +44,7 @@ func TestBlockSubscriber_Subscribe(t *testing.T) {
 }
 
 func TestBlockSubscriber_Unsubscribe(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	var hb heads.Broadcaster
 	var lp logpoller.LogPoller
 
@@ -63,7 +62,7 @@ func TestBlockSubscriber_Unsubscribe(t *testing.T) {
 }
 
 func TestBlockSubscriber_Unsubscribe_Failure(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	var hb heads.Broadcaster
 	var lp logpoller.LogPoller
 
@@ -75,7 +74,7 @@ func TestBlockSubscriber_Unsubscribe_Failure(t *testing.T) {
 }
 
 func TestBlockSubscriber_GetBlockRange(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	var hb heads.Broadcaster
 
 	tests := []struct {
@@ -102,7 +101,7 @@ func TestBlockSubscriber_GetBlockRange(t *testing.T) {
 			bs := NewBlockSubscriber(hb, lp, finality, lggr)
 			bs.blockHistorySize = historySize
 			bs.blockSize = blockSize
-			blocks, err := bs.getBlockRange(testutils.Context(t))
+			blocks, err := bs.getBlockRange(t.Context())
 
 			if tc.LatestBlockErr != nil {
 				assert.Equal(t, tc.LatestBlockErr.Error(), err.Error())
@@ -114,7 +113,7 @@ func TestBlockSubscriber_GetBlockRange(t *testing.T) {
 }
 
 func TestBlockSubscriber_InitializeBlocks(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	var hb heads.Broadcaster
 
 	tests := []struct {
@@ -160,7 +159,7 @@ func TestBlockSubscriber_InitializeBlocks(t *testing.T) {
 			bs := NewBlockSubscriber(hb, lp, finality, lggr)
 			bs.blockHistorySize = historySize
 			bs.blockSize = blockSize
-			err := bs.initializeBlocks(testutils.Context(t), tc.Blocks)
+			err := bs.initializeBlocks(t.Context(), tc.Blocks)
 
 			if tc.Error != nil {
 				assert.Equal(t, tc.Error.Error(), err.Error())
@@ -177,7 +176,7 @@ func TestBlockSubscriber_InitializeBlocks(t *testing.T) {
 }
 
 func TestBlockSubscriber_BuildHistory(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	var hb heads.Broadcaster
 	lp := mocks.NewLogPoller(t)
 
@@ -227,7 +226,7 @@ func TestBlockSubscriber_BuildHistory(t *testing.T) {
 }
 
 func TestBlockSubscriber_Cleanup(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	var hb heads.Broadcaster
 	lp := mocks.NewLogPoller(t)
 
@@ -275,7 +274,7 @@ func TestBlockSubscriber_Cleanup(t *testing.T) {
 }
 
 func TestBlockSubscriber_Start(t *testing.T) {
-	lggr := logger.TestLogger(t)
+	lggr := logger.Test(t)
 	hb := headstest.NewBroadcaster[*evmtypes.Head, common.Hash](t)
 	hb.On("Subscribe", mock.Anything).Return(&evmtypes.Head{Number: 42}, func() {})
 	lp := mocks.NewLogPoller(t)
@@ -305,7 +304,7 @@ func TestBlockSubscriber_Start(t *testing.T) {
 	bs := NewBlockSubscriber(hb, lp, finality, lggr)
 	bs.blockHistorySize = historySize
 	bs.blockSize = blockSize
-	err := bs.Start(testutils.Context(t))
+	err := bs.Start(t.Context())
 	assert.NoError(t, err)
 
 	h97 := evmtypes.Head{
