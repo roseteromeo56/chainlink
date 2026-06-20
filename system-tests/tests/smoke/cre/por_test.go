@@ -554,7 +554,6 @@ func setupPoRTestEnvironment(
 				universalSetupOutput.DonTopology.WorkflowDonID,
 				homeChainOutput.ChainSelector,
 				rpcs,
-				nil, // without s3Provider.Output
 			)
 			require.NoError(t, settingsErr, "failed to create CRE CLI settings file")
 		}

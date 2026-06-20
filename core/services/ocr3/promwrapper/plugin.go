@@ -14,11 +14,10 @@ var _ ocr3types.ReportingPlugin[any] = &reportingPlugin[any]{}
 
 type reportingPlugin[RI any] struct {
 	ocr3types.ReportingPlugin[RI]
-	chainFamily string
-	chainID     string
-	plugin      string
-
+	chainID      string
+	plugin       string
 	configDigest string
+
 	// Prometheus components for tracking metrics
 	reportsGenerated *prometheus.CounterVec
 	durations        *prometheus.HistogramVec
@@ -28,7 +27,6 @@ type reportingPlugin[RI any] struct {
 
 func newReportingPlugin[RI any](
 	origin ocr3types.ReportingPlugin[RI],
-	chainFamily string,
 	chainID string,
 	plugin string,
 	configDigest string,
@@ -39,7 +37,6 @@ func newReportingPlugin[RI any](
 ) *reportingPlugin[RI] {
 	return &reportingPlugin[RI]{
 		ReportingPlugin:  origin,
-		chainFamily:      chainFamily,
 		chainID:          chainID,
 		plugin:           plugin,
 		configDigest:     configDigest,
@@ -111,13 +108,13 @@ func (p *reportingPlugin[RI]) Close() error {
 
 func (p *reportingPlugin[RI]) trackReports(function functionType, count int) {
 	p.reportsGenerated.
-		WithLabelValues(p.chainFamily, p.chainID, p.plugin, string(function)).
+		WithLabelValues(p.chainID, p.plugin, string(function)).
 		Add(float64(count))
 }
 
 func (p *reportingPlugin[RI]) updateStatus(status bool) {
 	p.status.
-		WithLabelValues(p.chainFamily, p.chainID, p.plugin, p.configDigest).
+		WithLabelValues(p.chainID, p.plugin, p.configDigest).
 		Set(float64(boolToInt(status)))
 }
 
@@ -126,7 +123,7 @@ func (p *reportingPlugin[RI]) trackSize(function functionType, size int, err err
 		return
 	}
 	p.sizes.
-		WithLabelValues(p.chainFamily, p.chainID, p.plugin, string(function)).
+		WithLabelValues(p.chainID, p.plugin, string(function)).
 		Add(float64(size))
 }
 
@@ -148,7 +145,7 @@ func withObservedExecution[RI, R any](
 	success := err == nil
 
 	p.durations.
-		WithLabelValues(p.chainFamily, p.chainID, p.plugin, string(function), strconv.FormatBool(success)).
+		WithLabelValues(p.chainID, p.plugin, string(function), strconv.FormatBool(success)).
 		Observe(float64(time.Since(start)))
 
 	p.updateStatus(true)

@@ -106,7 +106,6 @@ func TestCreateFactoryAndTransmitter_PeerWrapperNotStarted(t *testing.T) {
 		/* destChainWriter */ nil,
 		/* destFromAccounts */ nil,
 		ocr3confighelper.PublicConfig{},
-		"evm",
 		"1",
 		ccipcommon.PluginConfig{},
 		"",
@@ -145,7 +144,6 @@ func TestCreateFactoryAndTransmitter_NilDestChainWriter(t *testing.T) {
 			},
 		},
 	}
-	destChainFamily := "evm"
 	destChainID := "1"
 	pluginCfg := ccipcommon.PluginConfig{
 		// Provide a dummy factory that creates identifiable (or nil) transmitters
@@ -187,7 +185,6 @@ func TestCreateFactoryAndTransmitter_NilDestChainWriter(t *testing.T) {
 				nil, // Key: destChainWriter is nil
 				nil, // destFromAccounts can be nil as it's not used before NoOpTransmitter creation
 				publicCfg,
-				destChainFamily,
 				destChainID,
 				pluginCfg,
 				offrampAddrStr,

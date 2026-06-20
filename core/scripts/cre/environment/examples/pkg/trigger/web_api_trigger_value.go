@@ -77,7 +77,7 @@ func WebAPITriggerValue(gatewayURL, sender, receiver, privateKey string, timeout
 	}
 
 	codec := api.JsonRPCCodec{}
-	rawMsg, err := codec.EncodeLegacyRequest(msg)
+	rawMsg, err := codec.EncodeRequest(msg)
 	if err != nil {
 		return errors.Wrap(err, "error JSON-RPC encoding")
 	}

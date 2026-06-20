@@ -101,7 +101,6 @@ const (
 	LinkDecimals                           = 18
 	WethDecimals                           = 18
 	UsdcDecimals                           = 6
-	LBTCDecimals                           = 8
 
 	// Aptos APT Fungible Asset address
 	AptosAPTAddress = "0xa"

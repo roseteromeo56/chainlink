@@ -17,7 +17,6 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/ratelimit"
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/types/gateway"
-
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/api"
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/common"
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/connector"
@@ -194,7 +193,7 @@ func (c *OutgoingConnectorHandler) handleSingleNodeRequest(ctx context.Context, 
 	case resp := <-ch:
 		switch resp.Body.Method {
 		case api.MethodInternalError:
-			var errPayload jsonrpc.WireError
+			var errPayload api.JsonRPCError
 			err := json.Unmarshal(resp.Body.Payload, &errPayload)
 			if err != nil {
 				lggr.Errorw("failed to unmarshal err payload", "err", err)
@@ -317,7 +316,7 @@ func (c *OutgoingConnectorHandler) HandleGatewayMessage(ctx context.Context, gat
 	}
 
 	senderAllow, globalAllow := c.incomingRateLimiter.AllowVerbose(body.Sender)
-	errJSON := jsonrpc.WireError{
+	errJSON := api.JsonRPCError{
 		Code:    500,
 		Message: "",
 	}

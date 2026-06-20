@@ -17,10 +17,8 @@ import (
 
 const defaultStartTimeout = 3 * time.Minute
 
-var (
-	ErrServiceStopped  = errors.New("service stopped")
-	ErrServiceNotReady = errors.New("service not ready")
-)
+var ErrServiceStopped = errors.New("service stopped")
+var ErrServiceNotReady = errors.New("service not ready")
 
 type StandardCapabilities struct {
 	services.StateMachine

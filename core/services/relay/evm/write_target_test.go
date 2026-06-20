@@ -17,8 +17,6 @@ import (
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 
-	chainselectors "github.com/smartcontractkit/chain-selectors"
-
 	"github.com/smartcontractkit/chainlink-common/pkg/capabilities"
 	"github.com/smartcontractkit/chainlink-common/pkg/services/servicetest"
 	commontypes "github.com/smartcontractkit/chainlink-common/pkg/types"
@@ -123,7 +121,6 @@ func TestEvmWrite(t *testing.T) {
 	chain.On("TxManager").Return(txManager)
 	chain.On("LogPoller").Return(poller)
 	chain.On("LatestHead", mock.Anything).Return(commontypes.Head{Height: "99"}, nil)
-	chain.On("GetChainInfo", mock.Anything).Return(commontypes.ChainInfo{}, nil)
 
 	ht := headstest.NewTracker[*evmtypes.Head](t)
 	ht.On("LatestAndFinalizedBlock", mock.Anything).Return(&evmtypes.Head{Number: 99}, &evmtypes.Head{}, nil)
@@ -534,7 +531,7 @@ func TestExtractNetwork(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.networkName, func(t *testing.T) {
-			networkName, err := chainselectors.ExtractNetworkEnvName(tc.networkName)
+			networkName, err := evm.ExtractNetwork(tc.networkName)
 			if tc.expectedErr {
 				require.Error(t, err)
 				return

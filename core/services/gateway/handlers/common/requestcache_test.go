@@ -1,7 +1,6 @@
 package common_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -32,18 +31,11 @@ func TestRequestCache_Simple(t *testing.T) {
 	go func() {
 		require.NoError(t, cache.ProcessResponse(nodeResp, func(response *api.Message, responseData *requestState) (aggregated *handlers.UserCallbackPayload, newResponseData *requestState, err error) {
 			// ready after first response
-			var rawResponse json.RawMessage
-			rawResponse, err = json.Marshal(response)
-			if err != nil {
-				return nil, nil, fmt.Errorf("failed to marshal response: %w", err)
-			}
-			return &handlers.UserCallbackPayload{RawResponse: rawResponse}, nil, nil
+			return &handlers.UserCallbackPayload{Msg: response}, nil, nil
 		}))
 	}()
 	finalResp := <-callbackCh
-	var msg api.Message
-	require.NoError(t, json.Unmarshal(finalResp.RawResponse, &msg))
-	require.Equal(t, "aa", msg.Body.MessageId)
+	require.Equal(t, "aa", finalResp.Msg.Body.MessageId)
 }
 
 func TestRequestCache_MultiResponse(t *testing.T) {
@@ -73,12 +65,7 @@ func TestRequestCache_MultiResponse(t *testing.T) {
 				require.NoError(t, cache.ProcessResponse(resp, func(response *api.Message, responseData *requestState) (aggregated *handlers.UserCallbackPayload, newResponseData *requestState, err error) {
 					responseData.counter++
 					if responseData.counter == nResponsesPerRequest {
-						var rawResponse json.RawMessage
-						rawResponse, err = json.Marshal(response)
-						if err != nil {
-							return nil, nil, fmt.Errorf("failed to marshal response: %w", err)
-						}
-						return &handlers.UserCallbackPayload{RawResponse: rawResponse}, nil, nil
+						return &handlers.UserCallbackPayload{Msg: response}, nil, nil
 					}
 					return nil, responseData, nil
 				}))
@@ -88,10 +75,8 @@ func TestRequestCache_MultiResponse(t *testing.T) {
 
 	for i := 0; i < nRequests; i++ {
 		resp := <-chans[i]
-		var msg api.Message
-		require.NoError(t, json.Unmarshal(resp.RawResponse, &msg))
-		require.Equal(t, "abcd", msg.Body.MessageId)
-		require.Equal(t, reqs[i].Body.Sender, msg.Body.Receiver)
+		require.Equal(t, "abcd", resp.Msg.Body.MessageId)
+		require.Equal(t, reqs[i].Body.Sender, resp.Msg.Body.Receiver)
 	}
 }
 
@@ -106,11 +91,8 @@ func TestRequestCache_Timeout(t *testing.T) {
 	require.NoError(t, cache.NewRequest(req, callbackCh, initialState))
 
 	finalResp := <-callbackCh
-	codec := api.JsonRPCCodec{}
-	rawResp, err := codec.DecodeLegacyResponse(finalResp.RawResponse)
-	require.NoError(t, err)
-	require.Equal(t, "aa", rawResp.Body.MessageId)
-	require.Equal(t, api.RequestTimeoutError, finalResp.ErrorCode)
+	require.Equal(t, "aa", finalResp.Msg.Body.MessageId)
+	require.Equal(t, api.RequestTimeoutError, finalResp.ErrCode)
 }
 
 func TestRequestCache_MaxSize(t *testing.T) {

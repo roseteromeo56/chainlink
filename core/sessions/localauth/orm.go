@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	pkgerrors "github.com/pkg/errors"
 
 	"github.com/smartcontractkit/chainlink-common/pkg/sqlutil"
@@ -365,8 +364,4 @@ func (o *orm) FindExternalInitiator(
 	exi := &bridges.ExternalInitiator{}
 	err := o.ds.GetContext(ctx, exi, `SELECT * FROM external_initiators WHERE access_key = $1`, eia.AccessKey)
 	return exi, err
-}
-
-func (o *orm) ExtendRouter(r *gin.RouterGroup) error {
-	return nil
 }

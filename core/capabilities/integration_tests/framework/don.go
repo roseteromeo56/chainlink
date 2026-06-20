@@ -476,7 +476,7 @@ func startNewNode(ctx context.Context,
 
 	return cltest.NewApplicationWithConfigV2AndKeyOnSimulatedBlockchain(t, config, ethBlockchain.Backend,
 		nodeInfo, dispatcher, peerWrapper, newOracleFactoryFn, localCapabilities, keyV2, lggr, fetcherFunc,
-		fetcherFactoryFunc, NewFakeBillingClient())
+		fetcherFactoryFunc)
 }
 
 // Functions below this point are for adding non-standard capabilities to a DON, deliberately verbose. Eventually these

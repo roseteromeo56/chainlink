@@ -30,7 +30,7 @@ type ManualHTTPTriggerService struct {
 }
 
 func NewManualHTTPTriggerService(parentLggr logger.Logger) *ManualHTTPTriggerService {
-	lggr := logger.Named(parentLggr, "HTTPTriggerService")
+	lggr := logger.Named(parentLggr, "HttpTriggerService")
 
 	return &ManualHTTPTriggerService{
 		CapabilityInfo: manualHTTPTriggerInfo,
@@ -65,7 +65,7 @@ func (f *ManualHTTPTriggerService) ManualTrigger(ctx context.Context, payload *h
 	// Run in a goroutine to avoid blocking
 	go func() {
 		select {
-		case f.callbackCh <- f.createManualTriggerEvent(payload):
+		case f.callbackCh <- createManualHTTPTriggerResponse(payload):
 			// Successfully sent trigger response
 		case <-ctx.Done():
 			// Context cancelled, cleanup goroutine
@@ -76,7 +76,7 @@ func (f *ManualHTTPTriggerService) ManualTrigger(ctx context.Context, payload *h
 	return nil
 }
 
-func (f *ManualHTTPTriggerService) createManualTriggerEvent(payload *httptypedapi.Payload) capabilities.TriggerAndId[*httptypedapi.Payload] {
+func createManualHTTPTriggerResponse(payload *httptypedapi.Payload) capabilities.TriggerAndId[*httptypedapi.Payload] {
 	return capabilities.TriggerAndId[*httptypedapi.Payload]{
 		Trigger: payload,
 		Id:      "manual-http-trigger-id",
@@ -85,12 +85,16 @@ func (f *ManualHTTPTriggerService) createManualTriggerEvent(payload *httptypedap
 
 // Service interface methods
 func (f *ManualHTTPTriggerService) Start(ctx context.Context) error {
-	f.lggr.Debug("Starting HTTP Trigger Capability")
+	f.lggr.Info("Starting ManualManualHTTPTriggerService")
 	return nil
 }
 
 func (f *ManualHTTPTriggerService) Close() error {
-	f.lggr.Debug("Closing HTTP Trigger Capability")
+	f.lggr.Info("Closing ManualManualHTTPTriggerService")
+	return nil
+}
+
+func (f *ManualHTTPTriggerService) Ready() error {
 	return nil
 }
 
@@ -104,8 +108,4 @@ func (f *ManualHTTPTriggerService) Name() string {
 
 func (f *ManualHTTPTriggerService) Description() string {
 	return "Manual HTTP Trigger Service"
-}
-
-func (f *ManualHTTPTriggerService) Ready() error {
-	return nil
 }

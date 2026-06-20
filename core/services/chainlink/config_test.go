@@ -375,19 +375,6 @@ func TestConfig_Marshal(t *testing.T) {
 			UpstreamSyncInterval:        commoncfg.MustNewDuration(0 * time.Second),
 			UpstreamSyncRateLimit:       commoncfg.MustNewDuration(2 * time.Minute),
 		},
-		OIDC: toml.WebServerOIDC{
-			ClientID:             ptr("abcd1234"),
-			ProviderURL:          ptr("https://id.provider.com/oauth2/default"),
-			RedirectURL:          ptr("http://localhost:3000/signin"),
-			ClaimName:            ptr("groups"),
-			AdminClaim:           ptr("NodeAdmins"),
-			EditClaim:            ptr("NodeEditors"),
-			RunClaim:             ptr("NodeRunners"),
-			ReadClaim:            ptr("NodeReadOnly"),
-			SessionTimeout:       commoncfg.MustNewDuration(15 * time.Minute),
-			UserAPITokenEnabled:  ptr(false),
-			UserAPITokenDuration: commoncfg.MustNewDuration(240 * time.Hour),
-		},
 		RateLimit: toml.WebServerRateLimit{
 			Authenticated:         ptr[int64](42),
 			AuthenticatedPeriod:   commoncfg.MustNewDuration(time.Second),
@@ -691,7 +678,6 @@ func TestConfig_Marshal(t *testing.T) {
 					TransactionManagerV2: evmcfg.TransactionManagerV2Config{
 						Enabled: ptr(false),
 					},
-					ConfirmationTimeout: &minute,
 				},
 
 				HeadTracker: evmcfg.HeadTracker{
@@ -978,19 +964,6 @@ UserAPITokenDuration = '240h0m0s'
 UpstreamSyncInterval = '0s'
 UpstreamSyncRateLimit = '2m0s'
 
-[WebServer.OIDC]
-ClientID = 'abcd1234'
-ProviderURL = 'https://id.provider.com/oauth2/default'
-RedirectURL = 'http://localhost:3000/signin'
-ClaimName = 'groups'
-AdminClaim = 'NodeAdmins'
-EditClaim = 'NodeEditors'
-RunClaim = 'NodeRunners'
-ReadClaim = 'NodeReadOnly'
-SessionTimeout = '15m0s'
-UserAPITokenEnabled = false
-UserAPITokenDuration = '240h0m0s'
-
 [WebServer.MFA]
 RPID = 'test-rpid'
 RPOrigin = 'test-rp-origin'
@@ -1145,7 +1118,6 @@ MaxQueued = 99
 ReaperInterval = '1m0s'
 ReaperThreshold = '1m0s'
 ResendAfterThreshold = '1h0m0s'
-ConfirmationTimeout = '1m0s'
 
 [EVM.Transactions.AutoPurge]
 Enabled = false

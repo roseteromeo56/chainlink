@@ -52,7 +52,7 @@ func Test_CCIP_Messaging_EVM2Aptos(t *testing.T) {
 			sourceChain,
 			destChain,
 			sender,
-			false, // test router
+			false, // testRouter
 		)
 	)
 

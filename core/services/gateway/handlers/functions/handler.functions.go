@@ -21,7 +21,6 @@ import (
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
 	"github.com/smartcontractkit/chainlink-common/pkg/sqlutil"
 	"github.com/smartcontractkit/chainlink-evm/pkg/chains/legacyevm"
-
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/api"
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/config"
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/handlers"
@@ -199,11 +198,7 @@ func NewFunctionsHandler(
 	}
 }
 
-func (h *functionsHandler) HandleJSONRPCUserMessage(_ context.Context, _ jsonrpc.Request, _ chan<- handlers.UserCallbackPayload) error {
-	return errors.New("functions handler does not support JSON-RPC user messages")
-}
-
-func (h *functionsHandler) HandleLegacyUserMessage(ctx context.Context, msg *api.Message, callbackCh chan<- handlers.UserCallbackPayload) error {
+func (h *functionsHandler) HandleUserMessage(ctx context.Context, msg *api.Message, callbackCh chan<- handlers.UserCallbackPayload) error {
 	sender := common.HexToAddress(msg.Body.Sender)
 	if h.allowlist != nil && !h.allowlist.Allow(sender) {
 		h.lggr.Debugw("received a message from a non-allowlisted address", "sender", msg.Body.Sender)
@@ -353,9 +348,7 @@ func newSecretsResponse(request *api.Message, success bool, responses []*api.Mes
 	userResponse := *request
 	userResponse.Body.Receiver = request.Body.Sender
 	userResponse.Body.Payload = payloadJson
-	codec := &api.JsonRPCCodec{}
-
-	return &handlers.UserCallbackPayload{RawResponse: codec.EncodeLegacyResponse(&userResponse), ErrorCode: api.NoError}, nil
+	return &handlers.UserCallbackPayload{Msg: &userResponse, ErrCode: api.NoError, ErrMsg: ""}, nil
 }
 
 // Conforms to ResponseProcessor[*PendingRequest]
@@ -379,13 +372,12 @@ func (h *functionsHandler) processHeartbeatResponse(response *api.Message, respo
 		// success = true only means that we got F+1 responses
 		// it's up to the heartbeat sender to validate computation results
 		payload := CombinedResponse{ResponseBase: ResponseBase{Success: true}, NodeResponses: responseList}
-		codec := &api.JsonRPCCodec{}
 		payloadJson, err := json.Marshal(payload)
 		if err != nil {
-			return &handlers.UserCallbackPayload{RawResponse: codec.EncodeLegacyResponse(&userResponse), ErrorCode: api.NodeReponseEncodingError}, nil, nil
+			return &handlers.UserCallbackPayload{Msg: &userResponse, ErrCode: api.NodeReponseEncodingError, ErrMsg: ""}, nil, nil
 		}
 		userResponse.Body.Payload = payloadJson
-		return &handlers.UserCallbackPayload{RawResponse: codec.EncodeLegacyResponse(&userResponse), ErrorCode: api.NoError}, nil, nil
+		return &handlers.UserCallbackPayload{Msg: &userResponse, ErrCode: api.NoError, ErrMsg: ""}, nil, nil
 	}
 	// not ready to be processed yet
 	return nil, responseData, nil

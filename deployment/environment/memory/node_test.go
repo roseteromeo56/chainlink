@@ -5,23 +5,26 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/smartcontractkit/freeport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
 
-	cldf_chain "github.com/smartcontractkit/chainlink-deployments-framework/chain"
-	"github.com/smartcontractkit/chainlink/deployment"
+	"github.com/smartcontractkit/freeport"
+
 	"github.com/smartcontractkit/chainlink/v2/core/services/chainlink"
 	"github.com/smartcontractkit/chainlink/v2/core/services/relay"
+
+	"github.com/smartcontractkit/chainlink/deployment"
 )
 
 func TestNode(t *testing.T) {
-	blockchains := cldf_chain.NewBlockChainsFromSlice(NewMemoryChainsEVM(t, 3, 5))
+	chains, _ := NewMemoryChains(t, 3, 5)
 	ports := freeport.GetN(t, 1)
 	c := NewNodeConfig{
 		Port:           ports[0],
-		BlockChains:    blockchains,
+		Chains:         chains,
+		Solchains:      nil,
+		Aptoschains:    nil,
 		LogLevel:       zapcore.DebugLevel,
 		Bootstrap:      false,
 		RegistryConfig: deployment.CapabilityRegistryConfig{},
@@ -48,7 +51,7 @@ func TestNode(t *testing.T) {
 			gotChains[i] = k.ChainSelector
 			i++
 		}
-		assert.ElementsMatch(t, slices.Collect(maps.Keys(blockchains.EVMChains())), gotChains)
+		assert.ElementsMatch(t, slices.Collect(maps.Keys(chains)), gotChains)
 	})
 
 	t.Run("JDChainConfigs", func(t *testing.T) {

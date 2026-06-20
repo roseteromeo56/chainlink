@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/smartcontractkit/freeport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
 
-	cldf_chain "github.com/smartcontractkit/chainlink-deployments-framework/chain"
+	"github.com/smartcontractkit/freeport"
 
 	"github.com/smartcontractkit/chainlink-evm/pkg/testutils"
 	jobv1 "github.com/smartcontractkit/chainlink-protos/job-distributor/v1/job"
@@ -22,11 +21,13 @@ import (
 func TestJobClientProposeJob(t *testing.T) {
 	t.Parallel()
 	ctx := testutils.Context(t)
-	blockchains := cldf_chain.NewBlockChainsFromSlice(memory.NewMemoryChainsEVM(t, 1, 1))
+	chains, _ := memory.NewMemoryChains(t, 1, 1)
 	ports := freeport.GetN(t, 1)
 	c := memory.NewNodeConfig{
 		Port:           ports[0],
-		BlockChains:    blockchains,
+		Chains:         chains,
+		Solchains:      nil,
+		Aptoschains:    nil,
 		LogLevel:       zapcore.DebugLevel,
 		Bootstrap:      false,
 		RegistryConfig: deployment.CapabilityRegistryConfig{},
@@ -123,11 +124,13 @@ func TestJobClientProposeJob(t *testing.T) {
 func TestJobClientJobAPI(t *testing.T) {
 	t.Parallel()
 	ctx := testutils.Context(t)
-	blockchains := cldf_chain.NewBlockChainsFromSlice(memory.NewMemoryChainsEVM(t, 1, 1))
+	chains, _ := memory.NewMemoryChains(t, 1, 1)
 	ports := freeport.GetN(t, 1)
 	c := memory.NewNodeConfig{
 		Port:           ports[0],
-		BlockChains:    blockchains,
+		Chains:         chains,
+		Solchains:      nil,
+		Aptoschains:    nil,
 		LogLevel:       zapcore.DebugLevel,
 		Bootstrap:      false,
 		RegistryConfig: deployment.CapabilityRegistryConfig{},

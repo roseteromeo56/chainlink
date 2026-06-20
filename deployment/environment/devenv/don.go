@@ -130,7 +130,7 @@ func NewRegisteredDON(ctx context.Context, nodeInfo []NodeInfo, jd JobDistributo
 		if info.Name == "" {
 			info.Name = fmt.Sprintf("node-%d", i)
 		}
-		node, err := NewNodeWithContext(ctx, info)
+		node, err := NewNode(info)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create node %d: %w", i, err)
 		}
@@ -176,13 +176,8 @@ func NewRegisteredDON(ctx context.Context, nodeInfo []NodeInfo, jd JobDistributo
 	return don, nil
 }
 
-// Deprecated: use NewNodeWithContext
 func NewNode(nodeInfo NodeInfo) (*Node, error) {
-	return NewNodeWithContext(context.Background(), nodeInfo)
-}
-
-func NewNodeWithContext(ctx context.Context, nodeInfo NodeInfo) (*Node, error) {
-	gqlClient, err := client.NewWithContext(ctx, nodeInfo.CLConfig.URL, client.Credentials{
+	gqlClient, err := client.New(nodeInfo.CLConfig.URL, client.Credentials{
 		Email:    nodeInfo.CLConfig.Email,
 		Password: nodeInfo.CLConfig.Password,
 	})

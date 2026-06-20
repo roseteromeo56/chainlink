@@ -14,10 +14,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"github.com/smartcontractkit/chainlink-common/pkg/jsonrpc2"
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
 	"github.com/smartcontractkit/chainlink-common/pkg/services"
-
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/api"
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/config"
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/handlers"
@@ -63,7 +61,6 @@ func NewGatewayFromConfig(config *config.GatewayConfig, handlerFactory HandlerFa
 	}
 
 	handlerMap := make(map[string]handlers.Handler)
-
 	for _, donConfig := range config.Dons {
 		donConfig := donConfig
 		_, ok := handlerMap[donConfig.DonId]
@@ -130,68 +127,55 @@ func (g *gateway) Close() error {
 }
 
 // Called by the server
-func (g *gateway) ProcessRequest(ctx context.Context, rawRequest []byte, auth string) (rawResponse []byte, httpStatusCode int) {
+func (g *gateway) ProcessRequest(ctx context.Context, rawRequest []byte) (rawResponse []byte, httpStatusCode int) {
 	// decode
-	jsonRequest, err := jsonrpc2.DecodeRequest(rawRequest, auth)
+	msg, err := g.codec.DecodeRequest(rawRequest)
 	if err != nil {
-		return newError("", api.UserMessageParseError, err.Error())
+		return newError(g.codec, "", api.UserMessageParseError, err.Error())
 	}
-	msg, err := g.codec.DecodeJSONRequest(jsonRequest)
-	if err != nil {
-		return newError(jsonRequest.ID, api.UserMessageParseError, err.Error())
+	if msg == nil {
+		return newError(g.codec, "", api.UserMessageParseError, "nil message")
 	}
-	var isLegacyRequest = false
-	var handlerKey string
-	if msg == nil || msg.Body.DonId == "" {
-		// if no DON ID is specified, it is a new JsonRPC request. Use the service name as handler key
-		handlerKey = jsonRequest.ServiceName()
-	} else {
-		// Means legacy request. Proceed to validate it and fetch DonId
-		isLegacyRequest = true
-		if err = msg.Validate(); err != nil {
-			return newError(jsonRequest.ID, api.UserMessageParseError, err.Error())
-		}
-		handlerKey = msg.Body.DonId
+	if err = msg.Validate(); err != nil {
+		return newError(g.codec, msg.Body.MessageId, api.UserMessageParseError, err.Error())
 	}
-	h, ok := g.handlers[handlerKey]
+	// find correct handler
+	handler, ok := g.handlers[msg.Body.DonId]
 	if !ok {
-		return newError(jsonRequest.ID, api.UnsupportedDONIdError, "Unsupported DON ID or Handler: "+handlerKey)
+		return newError(g.codec, msg.Body.MessageId, api.UnsupportedDONIdError, "unsupported DON ID")
 	}
-	// send to the right handler
+	// send to the handler
 	responseCh := make(chan handlers.UserCallbackPayload, 1)
-	if isLegacyRequest {
-		err = h.HandleLegacyUserMessage(ctx, msg, responseCh)
-	} else {
-		err = h.HandleJSONRPCUserMessage(ctx, jsonRequest, responseCh)
-	}
+	err = handler.HandleUserMessage(ctx, msg, responseCh)
 	if err != nil {
-		return newError(jsonRequest.ID, api.HandlerError, err.Error())
+		return newError(g.codec, msg.Body.MessageId, api.HandlerError, err.Error())
 	}
 	// await response
 	var response handlers.UserCallbackPayload
 	select {
 	case <-ctx.Done():
-		return newError(jsonRequest.ID, api.RequestTimeoutError, "handler timeout")
+		return newError(g.codec, msg.Body.MessageId, api.RequestTimeoutError, "handler timeout")
 	case response = <-responseCh:
 		break
 	}
-	promRequest.WithLabelValues(response.ErrorCode.String()).Inc()
-	return response.RawResponse, api.ToHttpErrorCode(response.ErrorCode)
+	if response.ErrCode != api.NoError {
+		return newError(g.codec, msg.Body.MessageId, response.ErrCode, response.ErrMsg)
+	}
+	// encode
+	rawResponse, err = g.codec.EncodeResponse(response.Msg)
+	if err != nil {
+		return newError(g.codec, msg.Body.MessageId, api.NodeReponseEncodingError, "")
+	}
+	promRequest.WithLabelValues(api.NoError.String()).Inc()
+	return rawResponse, api.ToHttpErrorCode(api.NoError)
 }
 
-func newError(id string, errCode api.ErrorCode, errMsg string) ([]byte, int) {
-	response := jsonrpc2.Response{
-		Version: jsonrpc2.JsonRpcVersion,
-		ID:      id,
-		Error: &jsonrpc2.WireError{
-			Code:    api.ToJSONRPCErrorCode(errCode),
-			Message: errMsg,
-			Data:    nil,
-		},
-	}
-	rawResponse, err := json.Marshal(response)
+func newError(codec api.Codec, id string, errCode api.ErrorCode, errMsg string) ([]byte, int) {
+	rawResponse, err := codec.EncodeNewErrorResponse(id, api.ToJsonRPCErrorCode(errCode), errMsg, nil)
 	if err != nil {
-		rawResponse = []byte("fatal error" + err.Error())
+		// we're not even able to encode a valid JSON response
+		promRequest.WithLabelValues(api.FatalError.String()).Inc()
+		return []byte("fatal error"), api.ToHttpErrorCode(api.FatalError)
 	}
 	promRequest.WithLabelValues(errCode.String()).Inc()
 	return rawResponse, api.ToHttpErrorCode(errCode)

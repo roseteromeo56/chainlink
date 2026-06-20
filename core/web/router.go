@@ -99,11 +99,6 @@ func NewRouter(app chainlink.Application, prometheus *ginprom.Prometheus) (*gin.
 		graphqlHandler(app),
 	)
 
-	err = app.AuthenticationProvider().ExtendRouter(api)
-	if err != nil {
-		return nil, err
-	}
-
 	return engine, nil
 }
 

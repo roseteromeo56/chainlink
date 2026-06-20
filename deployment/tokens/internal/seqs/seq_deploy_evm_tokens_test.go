@@ -7,7 +7,6 @@ import (
 	chain_selectors "github.com/smartcontractkit/chain-selectors"
 	"github.com/stretchr/testify/require"
 
-	cldf_chain "github.com/smartcontractkit/chainlink-deployments-framework/chain"
 	"github.com/smartcontractkit/chainlink-deployments-framework/datastore"
 	cldf "github.com/smartcontractkit/chainlink-deployments-framework/deployment"
 	"github.com/smartcontractkit/chainlink-deployments-framework/operations"
@@ -63,9 +62,7 @@ func Test_SeqDeployEVMTokens(t *testing.T) {
 				ab = cldf.NewMemoryAddressBook()
 				ds = datastore.NewMemoryDataStore()
 
-				chains = cldf_chain.NewBlockChainsFromSlice(
-					memory.NewMemoryChainsEVMWithChainIDs(t, []uint64{chainID}, 1),
-				).EVMChains()
+				chains, _ = memory.NewMemoryChainsWithChainIDs(t, []uint64{chainID}, 1)
 
 				b    = optest.NewBundle(t)
 				deps = SeqDeployEVMTokensDeps{

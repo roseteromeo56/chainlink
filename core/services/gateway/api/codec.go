@@ -1,23 +1,14 @@
 package api
 
-import (
-	"github.com/smartcontractkit/chainlink-common/pkg/jsonrpc2"
-)
-
 // Codec implements (de)serialization of Message objects.
 type Codec interface {
-	DecodeRawRequest(msgBytes []byte, jwtToken string) (*Message, error)
+	DecodeRequest(msgBytes []byte) (*Message, error)
 
-	DecodeJSONRequest(request jsonrpc2.Request) (*Message, error)
+	EncodeRequest(msg *Message) ([]byte, error)
 
-	// EncodeLegacyRequest creates a Json request with a Message object
-	// embedded in jsonrpc2.Request.Params as opposed to new requests,
-	// which add payload fields directly in jsonrpc2.Request.Params.
-	EncodeLegacyRequest(msg *Message) ([]byte, error)
+	DecodeResponse(msgBytes []byte) (*Message, error)
 
-	DecodeLegacyResponse(msgBytes []byte) (*Message, error)
+	EncodeResponse(msg *Message) ([]byte, error)
 
-	EncodeLegacyResponse(msg *Message) []byte
-
-	EncodeNewErrorResponse(id string, code int64, message string, data []byte) []byte
+	EncodeNewErrorResponse(id string, code int, message string, data []byte) ([]byte, error)
 }

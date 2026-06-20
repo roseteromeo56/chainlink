@@ -152,7 +152,6 @@ func Test_initServerConfig(t *testing.T) {
 					"../services/chainlink/testdata/mergingsecretsdata/secrets-mercury-split-two.toml",
 					"../services/chainlink/testdata/mergingsecretsdata/secrets-threshold.toml",
 					"../services/chainlink/testdata/mergingsecretsdata/secrets-webserver-ldap.toml",
-					"../services/chainlink/testdata/mergingsecretsdata/secrets-webserver-oidc.toml",
 				},
 			},
 			wantErr: false,

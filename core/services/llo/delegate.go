@@ -182,7 +182,6 @@ func (d *delegate) Start(ctx context.Context) error {
 						},
 					),
 					lggr,
-					"",
 					d.cfg.ChainID,
 					"llo",
 				),

@@ -11,7 +11,6 @@ import (
 type MockRelayer struct {
 	Head         commontypes.Head
 	ChainStatus  commontypes.ChainStatus
-	ChainInfo    commontypes.ChainInfo
 	NodeStatuses []commontypes.NodeStatus
 }
 
@@ -53,10 +52,6 @@ func (m MockRelayer) LatestHead(_ context.Context) (commontypes.Head, error) {
 
 func (m MockRelayer) GetChainStatus(ctx context.Context) (commontypes.ChainStatus, error) {
 	return m.ChainStatus, nil
-}
-
-func (m MockRelayer) GetChainInfo(_ context.Context) (commontypes.ChainInfo, error) {
-	panic("not implemented")
 }
 
 func (m MockRelayer) ListNodeStatuses(ctx context.Context, pageSize int32, pageToken string) (stats []commontypes.NodeStatus, nextPageToken string, total int, err error) {

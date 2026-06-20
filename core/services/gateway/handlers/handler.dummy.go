@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sync"
 
@@ -11,7 +10,6 @@ import (
 
 	jsonrpc "github.com/smartcontractkit/chainlink-common/pkg/jsonrpc2"
 	"github.com/smartcontractkit/chainlink-common/pkg/logger"
-
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/api"
 	"github.com/smartcontractkit/chainlink/v2/core/services/gateway/config"
 )
@@ -41,11 +39,7 @@ func NewDummyHandler(donConfig *config.DONConfig, don DON, lggr logger.Logger) (
 	}, nil
 }
 
-func (d *dummyHandler) HandleJSONRPCUserMessage(_ context.Context, _ jsonrpc.Request, _ chan<- UserCallbackPayload) error {
-	return errors.New("dummy handler does not support JSON-RPC user messages")
-}
-
-func (d *dummyHandler) HandleLegacyUserMessage(ctx context.Context, msg *api.Message, callbackCh chan<- UserCallbackPayload) error {
+func (d *dummyHandler) HandleUserMessage(ctx context.Context, msg *api.Message, callbackCh chan<- UserCallbackPayload) error {
 	d.mu.Lock()
 	d.savedCallbacks[msg.Body.MessageId] = &savedCallback{msg.Body.MessageId, callbackCh}
 	don := d.don
@@ -87,8 +81,7 @@ func (d *dummyHandler) HandleNodeMessage(ctx context.Context, resp *jsonrpc.Resp
 
 	if found {
 		// Send first response from a node back to the user, ignore any other ones.
-		codec := api.JsonRPCCodec{}
-		savedCb.callbackCh <- UserCallbackPayload{RawResponse: codec.EncodeLegacyResponse(&msg), ErrorCode: api.NoError}
+		savedCb.callbackCh <- UserCallbackPayload{Msg: &msg, ErrCode: api.NoError, ErrMsg: ""}
 		close(savedCb.callbackCh)
 	}
 	return nil
