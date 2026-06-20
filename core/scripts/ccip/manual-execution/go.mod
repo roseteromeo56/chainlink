@@ -5,8 +5,9 @@ go 1.24.2
 require (
 	github.com/ethereum/go-ethereum v1.17.0
 	github.com/pkg/errors v0.9.1
-	github.com/smartcontractkit/chain-selectors v1.0.59
-	golang.org/x/crypto v0.45.0
+	github.com/smartcontractkit/chain-selectors v1.0.59 develop
+	golang.org/x/crypto v0.47.0
+	golang.org/x/crypto v0.45.0 develop
 )
 
 require (
@@ -50,9 +51,12 @@ require (
 	go.opentelemetry.io/otel v1.39.0 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
+	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect dependabot/go_modules/core/scripts/go_modules-ee72303f3d
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect develop
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect develop develop
 	golang.org/x/time v0.10.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
