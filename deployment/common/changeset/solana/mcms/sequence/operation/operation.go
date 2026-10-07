@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
-	"math/rand"
+	"crypto/rand"
 
 	binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
