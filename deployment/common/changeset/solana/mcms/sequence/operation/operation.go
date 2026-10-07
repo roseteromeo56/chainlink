@@ -1,10 +1,11 @@
 package operation
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
-	"crypto/rand"
 
 	binary "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
@@ -250,7 +251,10 @@ func initMCM(b operations.Bundle, deps Deps, in InitMCMInput) (InitMCMOutput, er
 	b.Logger.Infow("mcm config not initialized, initializing", "chain", deps.Chain.String())
 	log := logger.With(b.Logger, "chain", deps.Chain.String(), "contract", typeAndVersion.String())
 
-	seed := randomSeed()
+	seed, err := randomSeed(rand.Reader)
+	if err != nil {
+		return out, fmt.Errorf("failed to generate MCM seed: %w", err)
+	}
 	log.Infow("generated MCM seed", "seed", string(seed[:]))
 	err = initializeMCM(b, deps, programID, seed)
 	if err != nil {
@@ -358,7 +362,10 @@ func initTimelock(b operations.Bundle, deps Deps, in InitTimelockInput) (InitTim
 	b.Logger.Infow("timelock config not initialized, initializing", "chain", deps.Chain.String())
 	log := logger.With(b.Logger, "chain", deps.Chain.String(), "contract", typeAndVersion.String())
 
-	seed := randomSeed()
+	seed, err := randomSeed(rand.Reader)
+	if err != nil {
+		return out, fmt.Errorf("failed to generate timelock seed: %w", err)
+	}
 	log.Infow("generated Timelock seed", "seed", string(seed[:]))
 
 	err = initializeTimelock(b, deps, programID, seed, in.MinDelay)
@@ -464,13 +471,17 @@ func addAccess(b operations.Bundle, deps Deps, in AddAccessInput) (AddAccessOutp
 	return out, nil
 }
 
-func randomSeed() state.PDASeed {
+func randomSeed(source io.Reader) (state.PDASeed, error) {
 	const alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 	seed := state.PDASeed{}
 	for i := range seed {
-		seed[i] = alphabet[rand.Intn(len(alphabet))]
+		value, err := rand.Int(source, big.NewInt(int64(len(alphabet))))
+		if err != nil {
+			return state.PDASeed{}, err
+		}
+		seed[i] = alphabet[value.Int64()]
 	}
 
-	return seed
+	return seed, nil
 }
