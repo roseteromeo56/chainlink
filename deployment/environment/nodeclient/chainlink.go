@@ -63,7 +63,7 @@ func initRestyClient(url string, email string, password string, headers map[stri
 	isDebug := os.Getenv("RESTY_DEBUG") == "true"
 	// G402 - TODO: certificates
 	//nolint
-	rc := resty.New().SetBaseURL(url).SetHeaders(headers).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}).SetDebug(isDebug)
+	rc := resty.New().SetBaseURL(url).SetHeaders(headers).SetTLSClientConfig(&tls.Config{InsecureSkipVerify: false}).SetDebug(isDebug)
 	if timeout != nil {
 		rc.SetTimeout(*timeout)
 	}
